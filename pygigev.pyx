@@ -242,7 +242,7 @@ cdef class PyGigEV:
         return self.handleExitCode(exitcode)
 
     def GevWaitForNextImage(self, decl.UINT32 timeout=1000):
-        cdef int size = self.height * self.width
+        cdef int size = self.height * self.width * self.pixel_size
         cdef view.array buffer_view = view.array(shape=(size,), itemsize=sizeof(decl.UINT8), format="c", mode="c", allocate_buffer=False)
         cdef decl.GEV_BUFFER_OBJECT* img
         cdef decl.GEV_STATUS exitcode = 0
@@ -304,7 +304,7 @@ cdef class PyGigEV:
     def GevDeviceCount():
         return decl.GevDeviceCount()
 
-    @staticmethod 
+    @staticmethod
     def GetPixelSizeInBytes(int pixelFormat):
         return decl.GetPixelSizeInBytes(pixelFormat)
 
