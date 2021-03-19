@@ -257,7 +257,7 @@ cdef class PyGigEV:
         decl.GevReleaseImage(self.handle, img)
         decl.GevReleaseImageBuffer(self.handle, img.address)
 
-        return (buff, img.status, img.timestamp)
+        return (buff, img.status, img.id)
 
     # not working
     def GevStopImageTransfer(self):
