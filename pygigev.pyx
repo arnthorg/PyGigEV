@@ -250,14 +250,14 @@ cdef class PyGigEV:
         exitcode = decl.GevWaitForNextImage(self.handle, &img, timeout)
 
         if img is NULL or exitcode != decl.APIErrors.GEVLIB_OK:
-            return exitcode
+            return (exitcode, (None))
 
         buffer_view.data = <char *>img.address
         buff = np.asarray(buffer_view).view(np.uint8).copy()
         decl.GevReleaseImage(self.handle, img)
         decl.GevReleaseImageBuffer(self.handle, img.address)
 
-        return (buff, img.status, img.id)
+        return (exitcode, (buff, img.status, img.id))
 
     # not working
     def GevStopImageTransfer(self):

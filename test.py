@@ -1,7 +1,7 @@
 from pygigev import PyGigEV as gev
 
-from pygigev import GevPixelFormat
-from pygigev import color_conversions
+#from pygigev import GevPixelFormat
+#from pygigev import color_conversions
 
 import timeit
 import cv2
@@ -59,7 +59,7 @@ ctx.GevStartImageTransfer(-1)
 trying = False
 
 while(True):
-    img = ctx.GevWaitForNextImage(1)
+    img, _, _ = ctx.GevWaitForNextImage(1)
     if type(img) is int:
         if img == -6:
             continue
