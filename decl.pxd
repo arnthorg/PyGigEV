@@ -1,15 +1,18 @@
 import numpy as np
 cimport numpy as np
 from posix.time cimport timeval
+from libc cimport stdint
 
-ctypedef char INT8
-ctypedef unsigned char UINT8
-ctypedef short INT16
-ctypedef unsigned short UINT16
+
+ctypedef stdint.int8_t INT8
+ctypedef stdint.uint8_t UINT8
+ctypedef stdint.int16_t INT16
+ctypedef stdint.uint16_t UINT16
 ctypedef bint BOOL
-ctypedef int INT32
-ctypedef unsigned int UINT32
-ctypedef unsigned long UINT64
+ctypedef stdint.int32_t INT32
+ctypedef stdint.uint32_t UINT32
+ctypedef stdint.int64_t INT64
+ctypedef stdint.uint64_t UINT64
 
 ctypedef UINT8* PUINT8
 ctypedef UINT32* PUINT32
@@ -99,6 +102,7 @@ ctypedef struct GEV_CAMERA_OPTIONS:
     INT32  streamThreadAffinity        #// CPU affinity for streaming thread (marshall/unpack/write to user buffer) - default handling is "-1" 
     INT32  serverThreadAffinity        #// CPU affinity for packet server thread (recv/dispatch) - default handling is "-1"
     UINT32 msgChannel_timeout_ms
+    UINT32 enable_passthru_mode
 
 cdef extern from "gevapi.h":
 

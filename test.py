@@ -1,10 +1,16 @@
 from pygigev import PyGigEV as gev
 
+<<<<<<< HEAD
 #from pygigev import GevPixelFormat
 #from pygigev import color_conversions
+=======
+from pygigev import color_conversions
+>>>>>>> 1f2a6e4f7afd935ad97cc4f09fdd40424c6c7d0e
 
 import timeit
 import cv2
+from datetime import datetime
+import os
 
 # create new context to store native camera data
 ctx = gev()
@@ -43,11 +49,9 @@ print(params)
 width = params['width']
 height = params['height'] 
 
-params = ctx.GevGetCameraInterfaceOptions()
-print("Interface Params")
-print(params)
+exposure = 5000
 
-ctx.GevSetFeatureValueAsString("ExposureTime", "5000")
+ctx.GevSetFeatureValueAsString("ExposureTime", str(exposure))
 
 
 # allocate image buffers and prepare for async image transfer to buffer
@@ -58,8 +62,25 @@ ctx.GevStartImageTransfer(-1)
 
 trying = False
 
+<<<<<<< HEAD
 while(True):
     img, _, _ = ctx.GevWaitForNextImage(1)
+=======
+gev_pix_format = params['pixelFormat'][0]
+color_convert = True
+
+if gev_pix_format not in color_conversions:
+    print("Conversion to bgr not supported for this format")
+    color_convert = False
+
+params = ctx.GevGetCameraInterfaceOptions()
+print("Interface Params")
+print(params)
+
+
+while True:
+    img = ctx.GevWaitForNextImage(1)
+>>>>>>> 1f2a6e4f7afd935ad97cc4f09fdd40424c6c7d0e
     if type(img) is int:
         if img == -6:
             continue
@@ -67,17 +88,18 @@ while(True):
             break
     
     img = img.reshape(height, width) # is there a more efficient way to reshape?
+    
+    # convert to bgr
+    if color_convert:
+        img = cv2.cvtColor(img, color_conversions[gev_pix_format])
+    
     cv2.imshow('pyGigE-V', img)
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
     elif key == ord('s'):
-        if trying:
-            trying = False
-            ctx.GevSetFeatureValueAsString("ExposureTime", "100")
-        else:
-            trying = True
-            ctx.GevSetFeatureValueAsString("ExposureTime", "5000")
+        cv2.imwrite(os.path.join(os.getcwd(),datetime.now().strftime("%m_%d_%Y_%H_%M_%S")+".png"), img)
+
     
 cv2.destroyAllWindows()
 
