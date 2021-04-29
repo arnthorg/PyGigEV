@@ -96,7 +96,7 @@ color_conversions = {
 
 
 cdef class PyGigEV:
-    cdef decl.GEV_CAMERA_INFO[1000] cameras
+    cdef decl.GEV_CAMERA_INFO[6] cameras
     cdef decl.GEV_CAMERA_HANDLE handle
     cdef decl.GEV_BUFFER_OBJECT* image_object_ptr
     cdef decl.UINT8[:, ::1] buffers
@@ -122,11 +122,14 @@ cdef class PyGigEV:
     def __init__(self):
         self.GevGetCameraList()
 
-    def GevGetCameraList(self, int maxCameras=1000):
+    def GevGetCameraList(self, int maxCameras=6):
         cdef int numCameras
         cdef decl.GEV_STATUS exitcode = 0
         exitcode = decl.GevGetCameraList(self.cameras, maxCameras, &numCameras)
         return (self.handleExitCode(exitcode), numCameras)
+
+    def GetCameraList(self):
+        return self.cameras
 
     def GevOpenCamera(self, int gevAccessMode=4, int cameraListIndex=0):
         cdef decl.GEV_CAMERA_INFO _device = self.cameras[cameraListIndex]  # what happens with multiple cameras in list??
@@ -257,13 +260,22 @@ cdef class PyGigEV:
 
         if img is NULL or exitcode != decl.APIErrors.GEVLIB_OK:
             return (exitcode, (None))
+        dict = {
+            "timestamp": img.timestamp,
+            "id": img.id,
+            "status": img.status,
+            "pixel_depth": img.d,
+            "state": img.state,
+            "recv_size": img.recv_size,
+
+        }
 
         buffer_view.data = <char *>img.address
         buff = np.asarray(buffer_view).view(np.uint8).copy()
         decl.GevReleaseImage(self.handle, img)
         decl.GevReleaseImageBuffer(self.handle, img.address)
 
-        return (exitcode, (buff, img.status, img.id))
+        return (exitcode, (buff, dict))
 
     # not working
     def GevStopImageTransfer(self):
