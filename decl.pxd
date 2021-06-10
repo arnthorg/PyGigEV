@@ -17,7 +17,7 @@ ctypedef stdint.uint64_t UINT64
 ctypedef UINT8* PUINT8
 ctypedef UINT32* PUINT32
 
-ctypedef int GEV_STATUS
+ctypedef INT32 GEV_STATUS
 
 ctypedef struct GEVLIB_CONFIG_OPTIONS:
     UINT32 version

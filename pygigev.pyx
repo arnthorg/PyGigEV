@@ -177,7 +177,7 @@ cdef class PyGigEV:
 
         self.pixel_size = self.GetPixelSizeInBytes(self.format)
         
-        return {'code': exitcode, 'width': self.width, 'height': self.height, 'x_offset': self.x_offset, 'y_offset': self.y_offset, 'pixelFormat':(self.format, hex(self.format))}
+        return {'code': self.handleExitCode(exitcode), 'width': self.width, 'height': self.height, 'x_offset': self.x_offset, 'y_offset': self.y_offset, 'pixelFormat':(self.format, hex(self.format))}
 
     def GevSetImageParameters(self, decl.UINT32 width, decl.UINT32 height, decl.UINT32 x_offset, decl.UINT32 y_offset, decl.UINT32 format):
         cdef decl.GEV_STATUS exitcode = 0
@@ -259,7 +259,7 @@ cdef class PyGigEV:
         exitcode = decl.GevWaitForNextImage(self.handle, &img, timeout)
 
         if img is NULL or exitcode != decl.APIErrors.GEVLIB_OK:
-            return (exitcode, (None))
+            return (self.handleExitCode(exitcode), (None))
         dict = {
             "timestamp": img.timestamp,
             "id": img.id,
@@ -275,7 +275,7 @@ cdef class PyGigEV:
         decl.GevReleaseImage(self.handle, img)
         decl.GevReleaseImageBuffer(self.handle, img.address)
 
-        return (exitcode, (buff, dict))
+        return (self.handleExitCode(exitcode), (buff, dict))
 
     # not working
     def GevStopImageTransfer(self):
@@ -304,19 +304,17 @@ cdef class PyGigEV:
     def GevApiUninitialize():
         return decl.GevApiUninitialize()
 
-    @staticmethod
-    def GevGetLibraryConfigOptions():
+    def GevGetLibraryConfigOptions(self):
         cdef decl.GEVLIB_CONFIG_OPTIONS options
         cdef decl.GEV_STATUS exitcode = 0
         exitcode = decl.GevGetLibraryConfigOptions(&options)
-        return (exitcode, options)
+        return (self.handleExitCode(exitcode), options)
 
-    @staticmethod
-    def GevSetLibraryConfigOptions(object options):
+    def GevSetLibraryConfigOptions(self, object options):
         cdef decl.GEVLIB_CONFIG_OPTIONS _options = options
         cdef decl.GEV_STATUS exitcode = 0
         exitcode = decl.GevGetLibraryConfigOptions(&_options)
-        return exitcode
+        return self.handleExitCode(exitcode)
 
     @staticmethod
     def GevDeviceCount():
@@ -332,9 +330,11 @@ cdef class PyGigEV:
 
     @staticmethod
     def handleExitCode(exitcode):
-        if exitcode is not 0:
-            return "Method returned code " + str(exitcode) + ", please check your camera's manual."
-        else: return "OK"
+        #print("exitcode: ", exitcode)
+        return exitcode
+        #if exitcode is not 0:
+        #    return "Method returned code " + str(exitcode) + ", please check your camera's manual."
+        #else: return "OK"
     
     # ADDED!
     def GevSetFeatureValueAsString(self, feature, value):
